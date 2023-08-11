@@ -7,7 +7,32 @@ resource "aws_ecs_task_definition" "task" {
   task_role_arn            = aws_iam_role.task_role.arn
   execution_role_arn       = aws_iam_role.execution_role.arn
   requires_compatibilities = ["FARGATE"]
-  container_definitions    = file("./container_definitions.json")
+  container_definitions    = <<-EOS
+  [
+    {
+      "name": "nginx-container",
+      "image": "nginx:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "name": "webserver",
+          "protocol": "tcp",
+          "containerPort": 80,
+          "appProtocol": "http"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/nginx",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "nginx"
+        }
+      }
+    }
+  ]
+  EOS
 }
 
 # クラスター
