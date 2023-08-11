@@ -1,5 +1,42 @@
 # タスク定義
-resource "aws_ecs_task_definition" "task" {
+resource "aws_ecs_task_definition" "client-task" {
+  family                   = "nginx-task"
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
+  task_role_arn            = aws_iam_role.task_role.arn
+  execution_role_arn       = aws_iam_role.execution_role.arn
+  requires_compatibilities = ["FARGATE"]
+  container_definitions    = <<-EOS
+  [
+    {
+      "name": "nginx-container",
+      "image": "nginx:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "name": "webclient",
+          "protocol": "tcp",
+          "containerPort": 80,
+          "appProtocol": "http"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/nginx",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "nginx"
+        }
+      }
+    }
+  ]
+  EOS
+}
+
+# タスク定義
+resource "aws_ecs_task_definition" "server-task" {
   family                   = "nginx-task"
   cpu                      = "256"
   memory                   = "512"
@@ -50,7 +87,7 @@ resource "aws_service_discovery_http_namespace" "namespace" {
 resource "aws_ecs_service" "client" {
   name                   = "nginx-client"
   cluster                = aws_ecs_cluster.cluster.arn
-  task_definition        = aws_ecs_task_definition.task.arn
+  task_definition        = aws_ecs_task_definition.client-task.arn
   desired_count          = 1
   launch_type            = "FARGATE"
   platform_version       = "1.4.0"
@@ -82,7 +119,7 @@ resource "aws_ecs_service" "client" {
 resource "aws_ecs_service" "server" {
   name                   = "nginx-server"
   cluster                = aws_ecs_cluster.cluster.arn
-  task_definition        = aws_ecs_task_definition.task.arn
+  task_definition        = aws_ecs_task_definition.server-task.arn
   desired_count          = 1
   launch_type            = "FARGATE"
   platform_version       = "1.4.0"
