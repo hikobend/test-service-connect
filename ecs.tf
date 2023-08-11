@@ -16,7 +16,7 @@ resource "aws_ecs_task_definition" "task" {
       "memory": 128,
       "portMappings": [
         {
-          "name": "webbackend",
+          "name": "webserver",
           "protocol": "tcp",
           "containerPort": 80,
           "appProtocol": "http"
@@ -47,8 +47,8 @@ resource "aws_service_discovery_http_namespace" "namespace" {
 
 
 # サービス(クライアント側)
-resource "aws_ecs_service" "frontend" {
-  name                   = "nginx-frontend"
+resource "aws_ecs_service" "client" {
+  name                   = "nginx-client"
   cluster                = aws_ecs_cluster.cluster.arn
   task_definition        = aws_ecs_task_definition.task.arn
   desired_count          = 1
@@ -68,9 +68,9 @@ resource "aws_ecs_service" "frontend" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/svccon-frontend"
+        awslogs-group         = "/ecs/svccon-client"
         awslogs-region        = "ap-northeast-1"
-        awslogs-stream-prefix = "svccon-frontend"
+        awslogs-stream-prefix = "svccon-client"
       }
     }
 
@@ -79,8 +79,8 @@ resource "aws_ecs_service" "frontend" {
 }
 
 # サービス(サーバー側)
-resource "aws_ecs_service" "backend" {
-  name                   = "nginx-backend"
+resource "aws_ecs_service" "server" {
+  name                   = "nginx-server"
   cluster                = aws_ecs_cluster.cluster.arn
   task_definition        = aws_ecs_task_definition.task.arn
   desired_count          = 1
@@ -100,9 +100,9 @@ resource "aws_ecs_service" "backend" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/svccon-backend"
+        awslogs-group         = "/ecs/svccon-server"
         awslogs-region        = "ap-northeast-1"
-        awslogs-stream-prefix = "svccon-backend"
+        awslogs-stream-prefix = "svccon-server"
       }
     }
 
@@ -112,7 +112,7 @@ resource "aws_ecs_service" "backend" {
       client_alias {
         port = 80
       }
-      port_name = "webbackend"
+      port_name = "webserver"
     }
   }
 }
