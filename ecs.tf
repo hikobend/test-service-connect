@@ -16,7 +16,7 @@ resource "aws_ecs_task_definition" "task" {
       "memory": 128,
       "portMappings": [
         {
-          "name": "webserver",
+          "name": "webbackend",
           "protocol": "tcp",
           "containerPort": 80,
           "appProtocol": "http"
@@ -47,8 +47,8 @@ resource "aws_service_discovery_http_namespace" "namespace" {
 
 
 # サービス(クライアント側)
-resource "aws_ecs_service" "client" {
-  name                   = "nginx-client"
+resource "aws_ecs_service" "frontend" {
+  name                   = "nginx-frontend"
   cluster                = aws_ecs_cluster.cluster.arn
   task_definition        = aws_ecs_task_definition.task.arn
   desired_count          = 1
@@ -68,9 +68,9 @@ resource "aws_ecs_service" "client" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/svccon-client"
+        awslogs-group         = "/ecs/svccon-frontend"
         awslogs-region        = "ap-northeast-1"
-        awslogs-stream-prefix = "svccon-client"
+        awslogs-stream-prefix = "svccon-frontend"
       }
     }
 
@@ -79,8 +79,8 @@ resource "aws_ecs_service" "client" {
 }
 
 # サービス(サーバー側)
-resource "aws_ecs_service" "server" {
-  name                   = "nginx-server"
+resource "aws_ecs_service" "backend" {
+  name                   = "nginx-backend"
   cluster                = aws_ecs_cluster.cluster.arn
   task_definition        = aws_ecs_task_definition.task.arn
   desired_count          = 1
@@ -100,9 +100,9 @@ resource "aws_ecs_service" "server" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/svccon-server"
+        awslogs-group         = "/ecs/svccon-backend"
         awslogs-region        = "ap-northeast-1"
-        awslogs-stream-prefix = "svccon-server"
+        awslogs-stream-prefix = "svccon-backend"
       }
     }
 
@@ -112,7 +112,7 @@ resource "aws_ecs_service" "server" {
       client_alias {
         port = 80
       }
-      port_name = "webserver"
+      port_name = "webbackend"
     }
   }
 }
