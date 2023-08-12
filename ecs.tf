@@ -96,7 +96,7 @@ resource "aws_ecs_service" "client" {
   network_configuration {
     assign_public_ip = true
     security_groups  = [aws_security_group.sg.id]
-    subnets          = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+    subnets          = [module.network.public_subnets[0], module.network.public_subnets[1]]
   }
 
   service_connect_configuration {
@@ -128,7 +128,7 @@ resource "aws_ecs_service" "server" {
   network_configuration {
     assign_public_ip = true
     security_groups  = [aws_security_group.sg.id]
-    subnets          = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+    subnets          = [module.network.public_subnets[0], module.network.public_subnets[1]]
   }
 
   service_connect_configuration {

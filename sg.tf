@@ -1,13 +1,13 @@
 # デフォルトセキュリティグループ(デフォルトルール削除のため)
 resource "aws_default_security_group" "dfsg" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = module.network.vpc_id
 }
 
 # ECSサービス用セキュリティグループ
 resource "aws_security_group" "sg" {
   name        = "ecs-sg"
   description = "ecs-sg"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   tags = {
     Name = "nginx-sg"
