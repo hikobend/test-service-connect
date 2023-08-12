@@ -15,3 +15,16 @@ module "network" {
   public_route_table_tags = { Name = "route-table-public" }
   igw_tags                = { Name = "internet-gateway" }
 }
+
+module "sg" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = "security-group"
+  description = "security-group"
+  vpc_id      = module.network.vpc_id
+
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+  ingress_rules       = ["http-80-tcp"]
+  egress_cidr_blocks  = ["0.0.0.0/0"]
+  egress_rules        = ["all-all"]
+}
